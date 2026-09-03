@@ -1,0 +1,15 @@
+build/**
+install/**
+log/**
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Environment files
+.env

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<robot name="paxini_tactile_sensors">
+  <!-- Sensor dimensions and mounting transforms were not supplied by the protocol source. -->
+  <link name="paxini_base_link"/>
+
+  <link name="L5325_omega_link"/>
+  <joint name="L5325_omega_joint" type="fixed">
+    <parent link="paxini_base_link"/>
+    <child link="L5325_omega_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="S1813_elite_link"/>
+  <joint name="S1813_elite_joint" type="fixed">
+    <parent link="paxini_base_link"/>
+    <child link="S1813_elite_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>
