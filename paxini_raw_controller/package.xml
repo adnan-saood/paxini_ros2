@@ -1,19 +1,24 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>paxini_controller</name>
+  <name>paxini_raw_controller</name>
   <version>0.0.0</version>
-  <description>ROS2 driver controller for the paxini GEN3 tactile sensors</description>
+  <description>
+    Subscribes to the raw resultant/per-taxel topics published by
+    paxini_raw_hardware, enriches them with taxel geometry, and publishes the
+    full TactileSensor message plus RViz MarkerArray visualization -- entirely
+    outside of ros2_control, on fixed absolute topics.
+  </description>
   <maintainer email="adnan.saood@outlook.com">adnan-saood</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>controller_interface</depend>
   <depend>geometry_msgs</depend>
-  <depend>rclcpp</depend>
   <depend>paxini_hardware</depend>
-  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>visualization_msgs</depend>
 
   <export>
     <build_type>ament_cmake</build_type>

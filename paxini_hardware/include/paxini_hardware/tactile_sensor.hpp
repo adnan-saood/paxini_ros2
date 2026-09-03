@@ -32,7 +32,21 @@ public:
   void open(const std::string & device, int baud_rate);
   void close();
   bool is_open() const;
+  std::vector<float> read_resultant(const SensorConfig & sensor, int timeout_ms = 250);
   std::vector<float> read_distributed(const SensorConfig & sensor, int timeout_ms = 250);
+
+  /// Triggers the sensor's onboard hardware (zero-point) calibration.
+  /**
+   * This is a hardware calibration performed by the sensor's own firmware,
+   * not a software/offset correction applied on the host. The device is
+   * expected to briefly stop responding to other commands while it
+   * recalibrates, so a longer timeout than the regular read commands is
+   * used by default.
+   *
+   * \throws std::runtime_error if the bus is not open, the write fails, or
+   * no acknowledgement is received from the sensor within \p timeout_ms.
+   */
+  void calibrate(const SensorConfig & sensor, int timeout_ms = 2000);
 
 private:
   int file_descriptor_;

@@ -1,0 +1,8 @@
+<library path="paxini_tactile_hardware">
+  <class
+    name="paxini_hardware/PaxiniTactileHardware"
+    type="paxini_hardware::PaxiniTactileHardware"
+    base_class_type="hardware_interface::SensorInterface">
+    <description>Paxini GEN3 serial tactile-sensor hardware interface.</description>
+  </class>
+</library>

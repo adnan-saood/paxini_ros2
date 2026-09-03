@@ -1,0 +1,22 @@
+# Supported Paxini tactile sensors.
+#
+# Each entry describes one physical sensor module attached to the shared
+# serial bus:
+#   name                - unique identifier used throughout the ROS graph
+#                         (topic names, TF frame prefixes, state interface
+#                         prefixes, calibration service reporting, etc.)
+#   module_id           - the sensor's module number on the bus; the wire
+#                         protocol's device address is module_id + 1
+#   distributed_length  - number of bytes returned by the sensor's
+#                         distributed (per-taxel) force reading, i.e.
+#                         3 bytes (x, y, z) per taxel
+#
+# A matching geometry/<name>.csv file (taxel positions) must exist for each
+# sensor listed here; see paxini_hardware::load_taxel_geometry().
+sensors:
+  - name: L5325_omega
+    module_id: 0
+    distributed_length: 717
+  - name: S1813_elite
+    module_id: 2
+    distributed_length: 93

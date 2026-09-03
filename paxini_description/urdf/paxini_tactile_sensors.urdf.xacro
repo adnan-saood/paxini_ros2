@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="paxini_tactile_sensors">
+  <!-- NOTE: this ros2_control block intentionally only exposes the resultant
+       (summary) force per sensor. The full per-taxel force array (hundreds of
+       values per sensor) is published directly on regular topics by the
+       paxini_raw_hardware/paxini_raw_controller nodes instead of being routed
+       through ros2_control's scalar state-interface mechanism, which does not
+       scale well to sensor arrays with this many elements. See
+       paxini_raw_bringup for that pipeline, including the serial_port and
+       baud_rate configuration: this ros2_control hardware plugin does not
+       open the serial port itself, so no serial parameters are declared
+       here; it only subscribes to the resultant force topic published by
+       paxini_raw_hardware. This ros2_control interface acts as a
+       lightweight bridge/example showing how to claim the resultant force
+       from ros2_control. -->
+  <xacro:macro name="paxini_sensor_interfaces" params="name">
+    <sensor name="${name}">
+      <state_interface name="resultant_force_x"/>
+      <state_interface name="resultant_force_y"/>
+      <state_interface name="resultant_force_z"/>
+    </sensor>
+  </xacro:macro>
+
+  <link name="paxini_base_link"/>
+  <link name="L5325_omega_link"/>
+  <joint name="L5325_omega_joint" type="fixed">
+    <parent link="paxini_base_link"/>
+    <child link="L5325_omega_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="S1813_elite_link"/>
+  <joint name="S1813_elite_joint" type="fixed">
+    <parent link="paxini_base_link"/>
+    <child link="S1813_elite_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <ros2_control name="PaxiniTactileSystem" type="sensor">
+    <hardware>
+      <plugin>paxini_hardware/PaxiniTactileHardware</plugin>
+    </hardware>
+    <xacro:paxini_sensor_interfaces name="L5325_omega"/>
+    <xacro:paxini_sensor_interfaces name="S1813_elite"/>
+  </ros2_control>
+</robot>

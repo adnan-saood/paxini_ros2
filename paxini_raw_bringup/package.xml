@@ -1,19 +1,21 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>paxini_bringup</name>
+  <name>paxini_raw_bringup</name>
   <version>0.0.0</version>
-  <description>ROS2 driver bringup for the paxini GEN3 tactile sensors</description>
+  <description>
+    Launches the non-ros2_control tactile pipeline: paxini_raw_hardware (owns
+    the serial bus, publishes raw data) + paxini_raw_controller (enriches
+    with geometry and publishes markers), plus RViz for visualization.
+  </description>
   <maintainer email="adnan.saood@outlook.com">adnan-saood</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <exec_depend>launch</exec_depend>
-  <exec_depend>launch_ros</exec_depend>
-  <exec_depend>controller_manager</exec_depend>
-  <exec_depend>paxini_controller</exec_depend>
   <exec_depend>paxini_description</exec_depend>
+  <exec_depend>paxini_raw_controller</exec_depend>
+  <exec_depend>paxini_raw_hardware</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rviz2</exec_depend>
   <exec_depend>xacro</exec_depend>

@@ -7,18 +7,30 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(geometry_msgs REQUIRED)
 find_package(paxini_hardware REQUIRED)
+find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
 
-add_executable(paxini_tactile_controller src/tactile_controller.cpp)
-target_compile_features(paxini_tactile_controller PUBLIC cxx_std_17)
-ament_target_dependencies(paxini_tactile_controller rclcpp paxini_hardware)
-target_link_libraries(
-  paxini_tactile_controller
-  paxini_hardware::paxini_hardware__rosidl_typesupport_cpp
+add_library(paxini_tactile_broadcaster SHARED src/tactile_broadcaster.cpp)
+target_compile_features(paxini_tactile_broadcaster PUBLIC cxx_std_17)
+target_include_directories(paxini_tactile_broadcaster PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
+ament_target_dependencies(
+  paxini_tactile_broadcaster
+  controller_interface
+  geometry_msgs
+  paxini_hardware
+  pluginlib
+  rclcpp
+)
+pluginlib_export_plugin_description_file(controller_interface paxini_controller_plugin.xml)
 
-install(TARGETS paxini_tactile_controller DESTINATION lib/${PROJECT_NAME})
+install(DIRECTORY include/ DESTINATION include)
+install(TARGETS paxini_tactile_broadcaster ARCHIVE DESTINATION lib LIBRARY DESTINATION lib RUNTIME DESTINATION bin)
 
 if(BUILD_TESTING)
 endif()

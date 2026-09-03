@@ -1,0 +1,8 @@
+<library path="paxini_tactile_broadcaster">
+  <class
+    name="paxini_controller/TactileBroadcaster"
+    type="paxini_controller::TactileBroadcaster"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>Publishes Paxini resultant and taxel force state interfaces.</description>
+  </class>
+</library>

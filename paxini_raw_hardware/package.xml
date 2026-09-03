@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>paxini_raw_hardware</name>
+  <version>0.0.0</version>
+  <description>
+    Sole owner of the Paxini tactile sensor serial bus. Reads both the
+    resultant and full per-taxel distributed force data for every supported
+    sensor and publishes them directly on fixed, absolute, real-time-friendly
+    topics -- entirely outside of ros2_control -- since routing hundreds of
+    per-taxel scalars through ros2_control's state-interface mechanism does
+    not scale.
+  </description>
+  <maintainer email="adnan.saood@outlook.com">adnan-saood</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>geometry_msgs</depend>
+  <depend>paxini_hardware</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -13,6 +13,9 @@
 #include <termios.h>
 #include <unistd.h>
 
+#include "ament_index_cpp/get_package_share_directory.hpp"
+#include "yaml-cpp/yaml.h"
+
 namespace paxini_hardware
 {
 namespace
@@ -50,9 +53,65 @@ std::vector<uint8_t> distributed_command(const SensorConfig & sensor)
   return command;
 }
 
+std::vector<uint8_t> resultant_command(const SensorConfig & sensor)
+{
+  std::vector<uint8_t> command{
+    0x55, 0xAA, 0x09, 0x00, sensor.device_address(), 0x00, 0xFB,
+    0xF0, 0x03, 0x00, 0x00, 0x03, 0x00};
+  command.push_back(calculate_lrc(command));
+  return command;
+}
+
+// Hardware (onboard firmware) zero-point calibration command, taken from the
+// manufacturer-provided helper_scripts/UI_sensor.py reference implementation
+// (SensorUI.get_commands()'s "calibration" frame). Unlike the read commands
+// above, this frame has a fixed shape and no sensor-dependent length field.
+std::vector<uint8_t> calibration_command(const SensorConfig & sensor)
+{
+  std::vector<uint8_t> command{
+    0x55, 0xAA, 0x0A, 0x00, sensor.device_address(), 0x00, 0x79,
+    0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01};
+  command.push_back(calculate_lrc(command));
+  return command;
+}
+
 std::string system_error(const std::string & operation)
 {
   return operation + ": " + std::strerror(errno);
+}
+
+// Loads the sensor roster from the installed YAML config instead of
+// hardcoding it in C++, so adding/removing/re-addressing a physical sensor
+// module only requires editing config/sensors.yaml (no rebuild needed if
+// installed with --symlink-install).
+std::vector<SensorConfig> load_supported_sensors()
+{
+  const auto path =
+    ament_index_cpp::get_package_share_directory("paxini_hardware") + "/config/sensors.yaml";
+  try {
+    const auto root = YAML::LoadFile(path);
+    const auto sensors_node = root["sensors"];
+    if (!sensors_node || !sensors_node.IsSequence() || sensors_node.size() == 0) {
+      throw std::runtime_error("must contain a non-empty 'sensors' list");
+    }
+
+    std::vector<SensorConfig> sensors;
+    sensors.reserve(sensors_node.size());
+    for (const auto & entry : sensors_node) {
+      SensorConfig sensor;
+      sensor.name = entry["name"].as<std::string>();
+      sensor.module_id = static_cast<uint8_t>(entry["module_id"].as<unsigned int>());
+      sensor.distributed_length =
+        static_cast<uint16_t>(entry["distributed_length"].as<unsigned int>());
+      if (sensor.name.empty()) {
+        throw std::runtime_error("contains an entry with an empty 'name'");
+      }
+      sensors.push_back(std::move(sensor));
+    }
+    return sensors;
+  } catch (const std::exception & error) {
+    throw std::runtime_error("Invalid sensor configuration '" + path + "': " + error.what());
+  }
 }
 }  // namespace
 
@@ -68,10 +127,7 @@ std::size_t SensorConfig::point_count() const
 
 const std::vector<SensorConfig> & supported_sensors()
 {
-  static const std::vector<SensorConfig> sensors{
-    {"L5325_omega", 0, 717},
-    {"S1813_elite", 2, 93},
-  };
+  static const std::vector<SensorConfig> sensors = load_supported_sensors();
   return sensors;
 }
 
@@ -131,6 +187,36 @@ void TactileSensorBus::close()
 bool TactileSensorBus::is_open() const
 {
   return file_descriptor_ >= 0;
+}
+
+std::vector<float> TactileSensorBus::read_resultant(const SensorConfig & sensor, int timeout_ms)
+{
+  if (!is_open()) {
+    throw std::runtime_error("Serial device is not open");
+  }
+
+  tcflush(file_descriptor_, TCIFLUSH);
+  write_all(resultant_command(sensor));
+  const auto payload = read_response(3, timeout_ms);
+  return {
+    static_cast<float>(static_cast<int8_t>(payload[0])) * 0.1F,
+    static_cast<float>(static_cast<int8_t>(payload[1])) * 0.1F,
+    static_cast<float>(payload[2]) * 0.1F,
+  };
+}
+
+void TactileSensorBus::calibrate(const SensorConfig & sensor, int timeout_ms)
+{
+  if (!is_open()) {
+    throw std::runtime_error("Serial device is not open");
+  }
+
+  tcflush(file_descriptor_, TCIFLUSH);
+  write_all(calibration_command(sensor));
+  // The calibration acknowledgement carries no payload beyond the standard
+  // response header, so we only need to confirm it was received; a timeout
+  // here (no response) is surfaced to the caller as an std::runtime_error.
+  read_response(0, timeout_ms);
 }
 
 void TactileSensorBus::write_all(const std::vector<uint8_t> & command) const
