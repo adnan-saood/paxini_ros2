@@ -38,6 +38,7 @@ def generate_launch_description():
             name="paxini_raw_state_publisher",
             output="screen",
             parameters=[robot_description],
+            remappings=[("joint_states", "/paxini/joint_states")],
         ),
         # Sole owner of the tactile sensor serial bus. Reads both resultant
         # and full per-taxel data and publishes them on fixed absolute
