@@ -28,9 +28,12 @@
     <child link="L5325_omega_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
+  <!-- An including robot sets s1813_parent before the include when the S1813
+       is mounted elsewhere than paxini_base_link. -->
+  <xacro:property name="s1813_parent" default="paxini_base_link"/>
   <link name="S1813_elite_link"/>
   <joint name="S1813_elite_joint" type="fixed">
-    <parent link="paxini_base_link"/>
+    <parent link="${s1813_parent}"/>
     <child link="S1813_elite_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
   </joint>
